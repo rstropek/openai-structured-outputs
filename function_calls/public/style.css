@@ -1,0 +1,145 @@
+body {
+  font-family: system-ui, sans-serif;
+  background: #f7f7fa;
+  margin: 0;
+  padding: 0 0 2rem 0;
+}
+h1 {
+  text-align: center;
+  margin-top: 2rem;
+}
+#chat-form {
+  display: flex;
+  justify-content: center;
+  margin: 2rem auto 1rem auto;
+  max-width: 500px;
+}
+#chat-input {
+  flex: 1;
+  padding: 0.7rem;
+  font-size: 1rem;
+  border: 1px solid #bbb;
+  border-radius: 4px 0 0 4px;
+  outline: none;
+}
+#chat-form button {
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#chat-form button:hover {
+  background: #2563eb;
+}
+#talks-list {
+  max-width: 600px;
+  margin: 2rem auto 0 auto;
+}
+.talk {
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px #0001;
+  margin-bottom: 1rem;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.talk strong {
+  font-size: 1.1rem;
+}
+.talk button {
+  margin-left: 0.5rem;
+  border: none;
+  background: #e5e7eb;
+  color: #333;
+  border-radius: 3px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.talk button.delete-btn {
+  background: #f87171;
+  color: white;
+}
+.talk button.delete-btn:hover {
+  background: #dc2626;
+}
+.talk button.detail-btn {
+  background: #3b82f6;
+  color: white;
+}
+.talk button.detail-btn:hover {
+  background: #2563eb;
+}
+#detail-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #0007;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+#detail-modal.hidden {
+  display: none;
+}
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem 2.5rem;
+  min-width: 320px;
+  max-width: 90vw;
+  box-shadow: 0 4px 24px #0002;
+}
+.modal-content h2 {
+  margin-top: 0;
+}
+.modal-content button {
+  margin-top: 1.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.modal-content button:hover {
+  background: #2563eb;
+}
+.bubble {
+  max-width: 70%;
+  margin: 0.5rem 0;
+  padding: 0.7rem 1.1rem;
+  border-radius: 18px;
+  font-size: 1rem;
+  display: inline-block;
+  word-break: break-word;
+}
+.bubble.user {
+  background: #3b82f6;
+  color: white;
+  align-self: flex-end;
+  margin-left: 30%;
+}
+.bubble.assistant {
+  background: #e5e7eb;
+  color: #222;
+  align-self: flex-start;
+  margin-right: 30%;
+}
+#talks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+#talks-area {
+  max-width: 600px;
+  margin: 2rem auto 0 auto;
+}
