@@ -32,6 +32,7 @@ async function handleChat(chat) {
         input: chat,
         instructions: 'You are a helpful assistant that can help with talk proposals for a developer conference. You can use the tools provided to you to help with the user\'s request.',
         tools,
+        tool_choice: 'auto',
         store: false
       });
     } catch (err) {
