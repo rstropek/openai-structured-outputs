@@ -24,13 +24,15 @@ chatForm.onsubmit = async (e) => {
     body: JSON.stringify({ chat }),
   });
   const data = await res.json();
-  chat = data.chat;
+  chat = data;
+  console.log(chat);
   renderChat(chat);
   fetchTalks();
 };
 
 // Render chat bubbles in chat area and auto-scroll to bottom
 function renderChat(chat) {
+  console.log(chat);
   chatArea.innerHTML = chat
     .filter(msg => (msg.role === 'user' || msg.role === 'assistant') && msg.content && msg.content.trim() !== "")
     .map(msg => {

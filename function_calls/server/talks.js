@@ -18,24 +18,24 @@ const talks = [
 ];
 
 // Get all talks
-function getTalks() {
+export function getTalks() {
   return talks;
 }
 
 // Get a single talk by ID
-function getTalk(id) {
+export function getTalk(id) {
   return talks.find(t => t.id === id);
 }
 
 // Delete a single talk by ID
-function deleteTalk(id) {
+export function deleteTalk(id) {
   const idx = talks.findIndex(t => t.id === id);
   if (idx !== -1) talks.splice(idx, 1);
 }
 
 // Delete multiple talks by their IDs
-function deleteMultipleTalks(ids) {
-  const deletedCount = 0;
+export function deleteMultipleTalks(ids) {
+  let deletedCount = 0;
   ids.forEach(id => {
     const idx = talks.findIndex(t => t.id === id);
     if (idx !== -1) {
@@ -47,7 +47,7 @@ function deleteMultipleTalks(ids) {
 }
 
 // Add a talk proposal (with error handling)
-function submit_talk_proposal(talk) {
+export function submit_talk_proposal(talk) {
   try {
     talks.push(talk);
     return true;
@@ -55,6 +55,3 @@ function submit_talk_proposal(talk) {
     return false;
   }
 }
-
-// Export all talk functions
-module.exports = { getTalks, getTalk, deleteTalk, deleteMultipleTalks, submit_talk_proposal };
