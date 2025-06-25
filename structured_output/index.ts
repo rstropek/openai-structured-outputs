@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import fs from "fs";
 import { zodTextFormat } from "openai/helpers/zod";
+import { z } from "zod/v4";
 import { ContractSchema } from "./schema";
 import dotenv from "dotenv";
 
@@ -24,7 +25,7 @@ async function extractContractData(filePath: string) {
 
         console.log(`File uploaded: ${file.id}`);*/
 
-        const response = await openai.responses.parse({
+        const response = await openai.responses.create({
             model: "gpt-4o-2024-08-06",
             input: [
                 {
@@ -42,7 +43,12 @@ async function extractContractData(filePath: string) {
                 }
             ],
             text: {
-                format: zodTextFormat(ContractSchema, "contract_data")
+                format: {
+                    type: 'json_schema',
+                    name: 'structured_contract_data',
+                    strict: true,
+                    schema: z.toJSONSchema(ContractSchema)
+                }
             }
         });
 
@@ -53,8 +59,17 @@ async function extractContractData(filePath: string) {
             return;
         }
 
-        const parsed = response.output_parsed;
-        console.log("Extracted Contract Data:\n", JSON.stringify(parsed, null, 2));
+        const res = response.output[0];
+        if (res.type === "message") {
+            const content = res.content[0];
+            if (content.type === 'refusal') {
+                console.log(content.refusal);
+            } else if (content.type === 'output_text') {
+                console.log("Extracted Contract Data:\n", JSON.stringify(content.text, null, 2));
+            } else {
+                throw new Error("No response content");
+            }
+        }
     } catch (err: any) {
         console.error("Error during extraction:", err.message);
     }

@@ -1,3 +1,5 @@
+import "./style.css";
+
 const API_CHAT = "http://localhost:5000/api/chat";
 const API_TALKS = "http://localhost:5000/api/talks";
 

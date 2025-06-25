@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { addTalk, getTalks, getTalk, deleteTalk, submit_talk_proposal } = require('./talks');
+const { addTalk, getTalks, getTalk, deleteTalk, deleteMultipleTalks, submit_talk_proposal } = require('./talks');
 const { OpenAI } = require('openai');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -77,6 +77,35 @@ const tools = [
       }
     },
     strict: true
+  },
+  {
+    type: "function",
+    name: "list_talks",
+    description: "Listet alle verfügbaren Vorträge inklusive deren IDs und Werte auf.",
+    parameters: {
+      type: "object",
+      additionalProperties: false,
+      properties: {}
+    },
+    strict: true
+  },
+  {
+    type: "function",
+    name: "delete_talks",
+    description: "Löscht mehrere Vorträge anhand ihrer IDs.",
+    parameters: {
+      type: "object",
+      additionalProperties: false,
+      required: ["talk_ids"],
+      properties: {
+        talk_ids: {
+          type: "array",
+          items: { type: "string" },
+          description: "Array von Talk-IDs die gelöscht werden sollen. Talk-IDs können mithilfe der Function list_talks geholt werden."
+        }
+      }
+    },
+    strict: true
   }
 ];
 
@@ -93,10 +122,22 @@ async function handleChat(chat) {
     throw err; 
   }
 
-  const toolCall = response.output.find(item => item.type === "function_call" && item.name === "submit_talk_proposal");
+  const toolCall = response.output.find(item => item.type === "function_call");
+  console.log(toolCall.name);
   if (toolCall) {
     const args = JSON.parse(toolCall.arguments);
-    let result = submit_talk_proposal({ id: Date.now().toString(), ...args }) ? "success" : "fail";
+    let result;
+    
+    if (toolCall.name === "submit_talk_proposal") {
+      result = submit_talk_proposal({ id: Date.now().toString(), ...args }) ? "success" : "fail";
+    } else if (toolCall.name === "list_talks") {
+      result = JSON.stringify(getTalks());
+    } else if (toolCall.name === "delete_talks") {
+      console.log(args.talk_ids);
+      const deletedCount = deleteMultipleTalks(args.talk_ids);
+      result = JSON.stringify({ deleted_count: deletedCount, message: `Successfully deleted ${deletedCount} talks` });
+    }
+    
     chat.push(toolCall);
     chat.push({
       type: "function_call_output",

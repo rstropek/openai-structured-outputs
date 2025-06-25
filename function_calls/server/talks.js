@@ -33,6 +33,18 @@ function deleteTalk(id) {
   if (idx !== -1) talks.splice(idx, 1);
 }
 
+function deleteMultipleTalks(ids) {
+  const deletedCount = 0;
+  ids.forEach(id => {
+    const idx = talks.findIndex(t => t.id === id);
+    if (idx !== -1) {
+      talks.splice(idx, 1);
+      deletedCount++;
+    }
+  });
+  return deletedCount;
+}
+
 function submit_talk_proposal(talk) {
   try {
     talks.push(talk);
@@ -42,4 +54,4 @@ function submit_talk_proposal(talk) {
   }
 }
 
-module.exports = { addTalk, getTalks, getTalk, deleteTalk, submit_talk_proposal };
+module.exports = { addTalk, getTalks, getTalk, deleteTalk, deleteMultipleTalks, submit_talk_proposal };
