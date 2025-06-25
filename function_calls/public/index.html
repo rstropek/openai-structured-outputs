@@ -1,16 +1,25 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Vortrags-Chatbot</title>
+  <title>Talk Chatbot</title>
 </head>
 <body>
-  <h1>Vortrags-Chatbot</h1>
-  <form id="chat-form">
-    <input id="chat-input" type="text" placeholder="Vortrag eingeben..." required />
-    <button type="submit">Absenden</button>
-  </form>
-  <div id="talks-list"></div>
+  <h1>Talk Chatbot</h1>
+  <div id="main-container">
+    <div id="chat-column">
+      <div id="chat-area"></div>
+      <div id="chat-input-container">
+        <form id="chat-form">
+          <input id="chat-input" type="text" placeholder="Enter talk..." required />
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    </div>
+    <div id="talks-column">
+      <div id="talks-area"></div>
+    </div>
+  </div>
   <div id="detail-modal" class="hidden"></div>
   <script src="src/main.js" type="module"></script>
 </body>

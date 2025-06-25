@@ -1,17 +1,17 @@
 import { z } from "zod/v4";
 
 export const ContractSchema = z.object({
-  contract_title: z.string(),                  // Title or short name of the contract
-  contract_date: z.iso.date(),                 // Date of signing (YYYY-MM-DD)
-  effective_date: z.iso.date(),                // When the contract takes effect (YYYY-MM-DD)
-  duration_months: z.number(),                 // Duration in months
-  auto_renewal: z.boolean(),                   // Whether it renews automatically
-  parties: z.object({                          // Contracting parties
-    party_a: z.string(),
-    party_b: z.string(),
-  }),
-  license_scope: z.string(),                   // Description of usage rights / limitations
-  usage_purpose: z.enum(["academic", "commercial", "internal"]), // e.g., academic, commercial, internal
-  annual_fee_eur: z.number(),                  // Price / licensing cost
-  headlines: z.array(z.string()),              // Section titles in the contract
+  contract_title: z.string().meta({description: "Title or short name of the contract"}),          
+  contract_date: z.iso.date().meta({description: "Date of signing"}),
+  effective_date: z.iso.date().meta({description: "When the contract takes effect"}),
+  duration_months: z.number().meta({description: "Duration in months"}),
+  auto_renewal: z.boolean().meta({description: "Whether it renews automatically"}),
+  parties: z.object({
+    party_a: z.string().meta({description: "First contracting party"}),
+    party_b: z.string().meta({description: "Second contracting party"}),
+  }).meta({description: "Contracting parties"}),
+  license_scope: z.string().meta({description: "Description of usage rights / limitations"}),
+  usage_purpose: z.enum(["academic", "commercial", "internal"]).meta({description: "Purpose of the contract usage"}),
+  annual_fee_eur: z.number().meta({description: "Price / licensing cost"}),
+  headlines: z.array(z.string()).meta({description: "Section titles in the contract"}),
 });

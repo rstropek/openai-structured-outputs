@@ -1,6 +1,7 @@
+// Load dependencies and environment variables
 const express = require('express');
 const cors = require('cors');
-const { addTalk, getTalks, getTalk, deleteTalk, deleteMultipleTalks, submit_talk_proposal } = require('./talks');
+const { getTalks, getTalk, deleteTalk, deleteMultipleTalks, submit_talk_proposal } = require('./talks');
 const { OpenAI } = require('openai');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -9,13 +10,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Initialize OpenAI client
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Define OpenAI tool schemas for function calling
 const tools = [
   {
     type: "function",
     name: "submit_talk_proposal",
-    description: "Ermöglicht das Einreichen eines Vortragsvorschlags für eine Entwicklerkonferenz.",
+    description: "Enables submitting a talk proposal for a developer conference.",
     parameters: {
       type: "object",
       additionalProperties: false,
@@ -81,7 +84,7 @@ const tools = [
   {
     type: "function",
     name: "list_talks",
-    description: "Listet alle verfügbaren Vorträge inklusive deren IDs und Werte auf.",
+    description: "Lists all available talks including their IDs and values.",
     parameters: {
       type: "object",
       additionalProperties: false,
@@ -92,7 +95,7 @@ const tools = [
   {
     type: "function",
     name: "delete_talks",
-    description: "Löscht mehrere Vorträge anhand ihrer IDs.",
+    description: "Deletes multiple talks by their IDs.",
     parameters: {
       type: "object",
       additionalProperties: false,
@@ -101,7 +104,7 @@ const tools = [
         talk_ids: {
           type: "array",
           items: { type: "string" },
-          description: "Array von Talk-IDs die gelöscht werden sollen. Talk-IDs können mithilfe der Function list_talks geholt werden."
+          description: "Array of talk IDs to be deleted. Talk IDs can be retrieved using the list_talks function."
         }
       }
     },
@@ -109,58 +112,70 @@ const tools = [
   }
 ];
 
+// Handle chat requests and function calls
 async function handleChat(chat) {
-  let response;
-  try {
-    response = await openai.responses.create({
-      model: "gpt-4.1",
-      input: chat,
-      tools,
-    });
-  } catch (err) {
-    console.error("OpenAI API error:", err);
-    throw err; 
-  }
 
-  const toolCall = response.output.find(item => item.type === "function_call");
-  console.log(toolCall.name);
-  if (toolCall) {
-    const args = JSON.parse(toolCall.arguments);
-    let result;
-    
-    if (toolCall.name === "submit_talk_proposal") {
-      result = submit_talk_proposal({ id: Date.now().toString(), ...args }) ? "success" : "fail";
-    } else if (toolCall.name === "list_talks") {
-      result = JSON.stringify(getTalks());
-    } else if (toolCall.name === "delete_talks") {
-      console.log(args.talk_ids);
-      const deletedCount = deleteMultipleTalks(args.talk_ids);
-      result = JSON.stringify({ deleted_count: deletedCount, message: `Successfully deleted ${deletedCount} talks` });
+  while (true) {
+    let response;
+    try {
+      response = await openai.responses.create({
+        model: 'gpt-4.1',
+        input: chat,
+        instructions: 'You are a helpful assistant that can help with talk proposals for a developer conference. You can use the tools provided to you to help with the user\'s request.',
+        tools,
+        store: false
+      });
+    } catch (err) {
+      console.error('OpenAI API error:', err);
+      throw err;
     }
-    
-    chat.push(toolCall);
-    chat.push({
-      type: "function_call_output",
-      call_id: toolCall.call_id,
-      output: result
-    });
-    const response2 = await openai.responses.create({
-      model: "gpt-4.1",
-      input: chat,
-      tools,
-      store: true,
-    });
-    return { chat: [...chat, { role: "assistant", content: response2.output_text }] };
-  } else {
-    return { chat: [...chat, { role: "assistant", content: response.output_text }] };
+
+    let functionCallHandled = false;
+    for (const event of response.output) {
+      if (event.type === 'function_call') {
+        chat.push(event);
+        let result;
+        const args = JSON.parse(event.arguments);
+        console.log(`${event.call_id}: Calling ${event.name} with arguments ${event.arguments}`);
+        switch (event.name) {
+          case 'submit_talk_proposal':
+            result = submit_talk_proposal({ id: Date.now().toString(), ...args }) ? 'success' : 'fail';
+            break;
+          case 'list_talks':
+            result = JSON.stringify(getTalks());
+            break;
+          case 'delete_talks':
+            const deletedCount = deleteMultipleTalks(args.talk_ids);
+            result = JSON.stringify({ deleted_count: deletedCount, message: `Successfully deleted ${deletedCount} talks` });
+            break;
+          default:
+            result = `ERROR: Unknown function: ${event.name}`;
+        }
+        chat.push({
+          type: 'function_call_output',
+          call_id: event.call_id,
+          output: result
+        });
+        functionCallHandled = true;
+      } else if (event.type === 'message') {
+        chat.push({ role: 'assistant', content: event.content[0]?.text || '' });
+        // If a message is returned, we are done
+        return;
+      }
+    }
+    if (!functionCallHandled) {
+      // No function call in this response, break the loop
+      break;
+    }
   }
 }
 
+// API endpoints for chat and talks
 app.post('/api/chat', async (req, res) => {
   try {
     const { chat } = req.body;
-    const result = await handleChat(chat);
-    res.json(result);
+    await handleChat(chat);
+    res.json(chat);
   } catch (e) {
     res.status(400).send("Invalid request");
   }
@@ -181,6 +196,7 @@ app.delete('/api/talks/:id', (req, res) => {
   res.status(204).end();
 });
 
+// Start the server
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Express server running on http://localhost:${PORT}`);

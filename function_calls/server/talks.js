@@ -1,8 +1,9 @@
+// In-memory array to store talks
 const talks = [
   {
     id: "1",
-    title: "KI-Ethik und Verantwortung",
-    abstract: "Ein Vortrag über ethische Fragestellungen und Verantwortung im Umgang mit Künstlicher Intelligenz.",
+    title: "AI Ethics and Responsibility",
+    abstract: "A talk about ethical questions and responsibility in dealing with Artificial Intelligence.",
     speaker: {
       name: "Melanie Bauer",
       email: "melanie.bauer@example.com",
@@ -11,28 +12,28 @@ const talks = [
     co_speakers: [],
     category: "AI",
     format: "Talk",
-    keywords: ["Ethik", "KI"],
+    keywords: ["Ethics", "AI"],
     proposed_datetime: "2024-07-01T10:00:00Z"
   }
 ];
 
-function addTalk(talk) {
-  talks.push(talk);
-}
-
+// Get all talks
 function getTalks() {
   return talks;
 }
 
+// Get a single talk by ID
 function getTalk(id) {
   return talks.find(t => t.id === id);
 }
 
+// Delete a single talk by ID
 function deleteTalk(id) {
   const idx = talks.findIndex(t => t.id === id);
   if (idx !== -1) talks.splice(idx, 1);
 }
 
+// Delete multiple talks by their IDs
 function deleteMultipleTalks(ids) {
   const deletedCount = 0;
   ids.forEach(id => {
@@ -45,6 +46,7 @@ function deleteMultipleTalks(ids) {
   return deletedCount;
 }
 
+// Add a talk proposal (with error handling)
 function submit_talk_proposal(talk) {
   try {
     talks.push(talk);
@@ -54,4 +56,5 @@ function submit_talk_proposal(talk) {
   }
 }
 
-module.exports = { addTalk, getTalks, getTalk, deleteTalk, deleteMultipleTalks, submit_talk_proposal };
+// Export all talk functions
+module.exports = { getTalks, getTalk, deleteTalk, deleteMultipleTalks, submit_talk_proposal };

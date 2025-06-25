@@ -8,11 +8,49 @@ h1 {
   text-align: center;
   margin-top: 2rem;
 }
+/* Main container for two-column layout */
+#main-container {
+  display: flex;
+  justify-content: space-around;
+  margin: 2rem auto 0 auto;
+  gap: 2rem;
+  min-height: 70vh;
+}
+#chat-column {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #0001;
+  min-width: 350px;
+  max-width: 500px;
+  height: 70vh;
+  min-height: 500px;
+  position: relative;
+}
+#chat-area {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  scroll-behavior: smooth;
+}
+#chat-input-container {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 -2px 8px #0001;
+}
 #chat-form {
   display: flex;
   justify-content: center;
-  margin: 2rem auto 1rem auto;
-  max-width: 500px;
+  margin: 0;
+  max-width: none;
 }
 #chat-input {
   flex: 1;
@@ -35,9 +73,17 @@ h1 {
 #chat-form button:hover {
   background: #2563eb;
 }
-#talks-list {
-  max-width: 600px;
-  margin: 2rem auto 0 auto;
+#talks-column {
+  flex: 1 1 0;
+  min-width: 350px;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+}
+#talks-area {
+  width: 100%;
+  margin: 0;
+  padding: 0 0.5rem;
 }
 .talk {
   background: white;
@@ -133,13 +179,4 @@ h1 {
   color: #222;
   align-self: flex-start;
   margin-right: 30%;
-}
-#talks-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-#talks-area {
-  max-width: 1000px;
-  margin: 2rem auto 0 auto;
 }
