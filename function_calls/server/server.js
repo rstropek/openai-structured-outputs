@@ -28,12 +28,15 @@ async function handleChat(chat) {
     let response;
     try {
       response = await openai.responses.create({
-        model: 'gpt-4.1',
+        model: 'gpt-5',
         input: chat,
         instructions: 'You are a helpful assistant that can help with talk proposals for a developer conference. You can use the tools provided to you to help with the user\'s request.',
         tools,
         tool_choice: 'auto',
-        store: false
+        store: false,
+        reasoning: {
+          "effort": "minimal"
+        },
       });
     } catch (err) {
       console.error('OpenAI API error:', err);
