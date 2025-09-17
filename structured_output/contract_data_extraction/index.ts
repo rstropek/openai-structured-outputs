@@ -34,7 +34,7 @@ async function extractContractData(filePath: string) {
             input: [
                 {   
                     role: "system",
-                    content: `Extract one random contract data according to the provided JSON schema.`
+                    content: `Extract contract data according to the provided JSON schema.`
                 },
                 {
                     role: "user",

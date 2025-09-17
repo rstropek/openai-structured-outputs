@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 
-export const EmployeeSchema = z.object({
+const EmployeeSchema = z.object({
   EmployeeID: z
     .string()
     .regex(/^TC-(IT|HR|FN|MK|SL|SP|OP)\d{3}-\d{2}$/, {
@@ -10,17 +10,10 @@ export const EmployeeSchema = z.object({
 
   FirstName: z
     .string()
-    // letters incl. most Latin accents + space/apos/hyphen (no \p{L}, no /u)
-    .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ' -]{1,49}$/, {
-      message: "2–50 letters, may include spaces, apostrophes, or hyphens",
-    })
     .meta({ description: "Employee's first name" }),
 
   LastName: z
     .string()
-    .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ' -]{1,49}$/, {
-      message: "2–50 letters, may include spaces, apostrophes, or hyphens",
-    })
     .meta({ description: "Employee's last name" }),
 
   Department: z
@@ -36,21 +29,14 @@ export const EmployeeSchema = z.object({
 
   MobileNumber: z
     .string()
-    .regex(/^\+43\s?660\s?\d{7}$/, {
-      message: "Must be Austrian mobile format: +43 660 1234567",
-    })
-    .meta({ description: "Employee's mobile phone number" }),
+    .meta({ description: "Employee's mobile phone number (Austrian format preferred)" }),
 
   Email: z
-    .email()
+    .string()
     .meta({ description: "Employee's email address" }),
 
   Street: z
     .string()
-    // letters (incl. accents) + digits + space . , ' -
-    .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ0-9 .,'-]{2,100}$/, {
-      message: "2–100 chars, letters/numbers allowed",
-    })
     .meta({ description: "Street name of residence" }),
 
   HouseNumber: z
@@ -69,12 +55,17 @@ export const EmployeeSchema = z.object({
 
   City: z
     .string()
-    .regex(/^[A-Za-zÀ-ÖØ-öø-ÿ .'-]{2,80}$/, {
-      message: "2–80 chars, letters and spaces allowed",
-    })
+    .min(2)
+    .max(80)
     .meta({ description: "City of residence" }),
 
   Country: z
     .literal("Austria")
     .meta({ description: "Country of residence (fixed to Austria)" }),
 });
+
+export const EmployeesWrapperSchema = z
+  .object({
+    employees: z.array(EmployeeSchema).meta({ description: "List of employees" }),
+  })
+  .meta({ description: "Wrapper object containing a list of employees" });

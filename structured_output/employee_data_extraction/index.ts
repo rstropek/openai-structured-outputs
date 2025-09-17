@@ -2,8 +2,14 @@
 import OpenAI from "openai";
 import fs from "fs";
 import { z } from "zod/v4";
-import { EmployeeSchema } from "./schema.js";
+import { EmployeesWrapperSchema } from "./schema.js";
 import dotenv from "dotenv";
+import readline from "readline";
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 
 dotenv.config();
 
@@ -13,64 +19,81 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Main function to extract contract data from PDF
-async function extractEmployeeData(filePath: string) {
-    try {
-        // File upload 
-        /*const fileStream: fs.ReadStream = fs.createReadStream(filePath);
+async function interactiveLoop(filePath: string) {
+    /*// File upload 
+    const fileStream: fs.ReadStream = fs.createReadStream(filePath);
 
-        const file = await openai.files.create({
-            file: fileStream,
-            purpose: "user_data",
-        });
+    const file = await openai.files.create({
+        file: fileStream,
+        purpose: "user_data",
+    });
 
-        console.log(`File uploaded: ${file.id}`);*/
+    console.log(`File uploaded: ${file.id}\n`);*/
 
-        const response = await openai.responses.create({
-            model: "gpt-5",
-            reasoning: {
-                effort: "minimal"
-            },
-            input: [
-                {   
-                    role: "system",
-                    content: `Extract one random employee data according to the provided JSON schema.`
-                },
-                {
-                    role: "user",
-                    content: [
-                        {
-                            type: "input_file",
-                            file_id: "file-5CfvKAxDbMKsdHuPFREAaK"
-                        }
-                    ]
-                }
-            ],
-            text: {
-                format: {
-                    type: 'json_schema',
-                    name: 'structured_employee_data',
-                    strict: true,
-                    schema: z.toJSONSchema(EmployeeSchema)
-                }
-            }
-        });
+    console.log("Ask me questions about employees (type 'exit' to quit):");
 
-        // Check and handle response
-        console.log(`Response received: ${response.id} ${response.status}`);
-        if (response.status !== "completed") {
-            console.error("Response incomplete:", response.incomplete_details);
-            return;
+    while (true) {
+        const question: string = await new Promise(res => rl.question("\n> ", res));
+        if (question.trim().toLowerCase() === "exit") {
+            break;
         }
 
-        // Output extracted contract employee or handle errors
-        
-        console.log(`Extracted Employee Data:\n${JSON.stringify(JSON.parse(response.output_text), null, 2)}`);
-    } catch (err: any) {
-        // Error handling
-        console.error("Error during extraction:", err.message);
+        try {
+            const result = await askEmployeeQuestion(question, "file-BmeFUn49T6nw7cq9E9QvmY");
+            console.log("Result JSON:", JSON.stringify(result, null, 2));
+        } catch (err: any) {
+            console.error("Error:", err.message);
+        }
     }
+
+    rl.close();
 }
 
-// Run extraction
-await extractEmployeeData(filePath);
+async function askEmployeeQuestion(question: string, fileId: string) {
+    console.log("Asking question: " + question);
+    const response = await openai.responses.create({
+        model: "gpt-5",
+        reasoning: {
+            effort: "minimal"
+        },
+        input: [
+            {   
+                role: "system",
+                content: `Extract employees data according to the provided JSON schema. Return a list of employees.`
+            },
+            {
+                role: "user",
+                content: [
+                    {
+                        type: "input_file",
+                        file_id: fileId
+                    },
+                    {
+                        type: "input_text",
+                        text: question
+                    }
+                ]
+            }
+        ],
+        text: {
+            format: {
+                type: 'json_schema',
+                name: 'structured_employee_data',
+                strict: true,
+                schema: z.toJSONSchema(EmployeesWrapperSchema)
+            }
+        }
+    });
+
+    console.log("Response: " + response.id + " " + response.status);
+
+    if (response.status !== "completed") {
+        throw new Error("LLM response incomplete: " + JSON.stringify(response.incomplete_details));
+    }
+
+    return JSON.parse(response.output_text); // already JSON, just parse it
+}
+
+
+await interactiveLoop(filePath);
+
