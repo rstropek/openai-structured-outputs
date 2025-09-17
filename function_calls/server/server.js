@@ -35,7 +35,7 @@ async function handleChat(chat) {
         tool_choice: 'auto',
         store: false,
         reasoning: {
-          "effort": "minimal"
+          effort: 'minimal'
         },
       });
     } catch (err) {

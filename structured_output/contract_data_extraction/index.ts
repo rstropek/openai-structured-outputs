@@ -16,7 +16,7 @@ const openai = new OpenAI({
 // Main function to extract contract data from PDF
 async function extractContractData(filePath: string) {
     try {
-        /*// File upload 
+        // File upload 
         const fileStream: fs.ReadStream = fs.createReadStream(filePath);
 
         const file = await openai.files.create({
@@ -24,21 +24,24 @@ async function extractContractData(filePath: string) {
             purpose: "user_data",
         });
 
-        console.log(`File uploaded: ${file.id}`);*/
+        console.log(`File uploaded: ${file.id}`);
 
         const response = await openai.responses.create({
-            model: "gpt-4.1",
+            model: "gpt-5",
+            reasoning: {
+                effort: "minimal"
+            },
             input: [
-                {
+                {   
                     role: "system",
-                    content: `Extract contract data according to the provided JSON schema.`
+                    content: `Extract one random contract data according to the provided JSON schema.`
                 },
                 {
                     role: "user",
                     content: [
                         {
                             type: "input_file",
-                            file_id: "file-GDs7odG8xPi3afnEDkFuNH"
+                            file_id: file.id
                         }
                     ]
                 }
@@ -60,18 +63,9 @@ async function extractContractData(filePath: string) {
             return;
         }
 
-        // Output extracted contract data or handle errors
-        const res = response.output[0];
-        if (res.type === "message") {
-            const content = res.content[0];
-            if (content.type === 'refusal') {
-                console.error(content.refusal);
-            } else if (content.type === 'output_text') {
-                console.log(`Extracted Contract Data:\n${content.text}`);
-            } else {
-                throw new Error("No response content");
-            }
-        }
+        // Output extracted contract employee or handle errors
+        
+        console.log(`Extracted Contract Data:\n${JSON.stringify(JSON.parse(response.output_text), null, 2)}`);
     } catch (err: any) {
         // Error handling
         console.error("Error during extraction:", err.message);
