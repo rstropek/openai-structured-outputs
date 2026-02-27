@@ -4,7 +4,7 @@ This sample demonstrates OpenAI's **Structured Outputs** feature, which guarante
 
 ## What are Structured Outputs?
 
-Structured Outputs is a capability available in OpenAI's Chat Completions API that provides **guaranteed compliance** with your supplied JSON Schema. Unlike previous JSON mode implementations, Structured Outputs with `strict: true` offers a "foolproof" version that ensures the model will always generate responses matching your exact schema requirements.
+Structured Outputs is a capability available in OpenAI's **Responses API** (and Chat Completions API) that provides **guaranteed compliance** with your supplied JSON Schema. Unlike previous JSON mode implementations, Structured Outputs with `strict: true` offers a "foolproof" version that ensures the model will always generate responses matching your exact schema requirements.
 
 ### Key Benefits
 
@@ -61,6 +61,8 @@ export const ContractSchema = z.object({
 - **Enums**: Restricted value sets for categorization
 - **Arrays**: Lists of structured data
 - **Metadata**: Rich descriptions for better AI understanding
+
+The samples use the **Responses API** (`responses.create`) with `text.format` for structured JSON output. Set `OPENAI_API_KEY` in `.env`; optionally set `OPENAI_MODEL` (default: `gpt-5.2`). The employee sample also supports optional `OPENAI_FILE_ID` to reuse an already-uploaded file.
 
 ## Response Handling
 
