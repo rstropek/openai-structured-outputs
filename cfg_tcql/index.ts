@@ -86,6 +86,7 @@ async function generateTcqlQuery(naturalPrompt: string): Promise<string> {
       "Use the grammar tool to output the query. Output nothing else."
     : "You are a TCQL (Time Cockpit Query Language) expert. " +
       "Generate only a valid TCQL query that matches the user's request. " +
+      "For conditions on aggregated values from a subquery: use ( From ... Select New With { .X = Sum(...) } ) > value, not Sum( ( From ... ) ). " +
       "Use the tcql_grammar tool to output the query. Output nothing else.";
 
   const response = await openai.responses.create({

@@ -54,9 +54,12 @@ KW_COUNT: "Count"
 start: from_clause (SP where_clause)? (SP orderby_clause)? SP select_clause
 
 // ---------- From ----------
+// source: entity (e.g. Project.Include("Customer")) or back reference for subqueries (e.g. P.Timesheets, Cg.Customers.Projects.Timesheets)
 from_clause: KW_FROM SP alias SP KW_IN SP source
 alias: UIDENT
-source: entity_name include_chain?
+source: entity_source | backref_source
+entity_source: entity_name include_chain?
+backref_source: ident_chain
 entity_name: UIDENT
 include_chain: (DOT include_call)+
 include_call: "Include" LPAR (relation_path | STAR) RPAR
@@ -94,11 +97,13 @@ in_rhs: KW_IN SP LPAR SP expr (SP COMMA SP expr)* SP RPAR
 like_rhs: (KW_NOT SP)? KW_LIKE SP add_expr
 ?add_expr: mul_expr (SP (PLUS | MINUS) SP mul_expr)*
 ?mul_expr: unary_expr (SP (STAR | SLASH | PERCENT) SP unary_expr)*
-?unary_expr: KW_NOT SP unary_expr | atom
+// Not, unary minus (-expr), or atom
+?unary_expr: KW_NOT SP unary_expr | MINUS SP unary_expr | atom
 ?atom: LPAR SP expr SP RPAR
      | func_call
      | agg_call
      | member_access
+     | alias_ref
      | literal
      | param_access
      | nested_statement
@@ -108,16 +113,38 @@ func_call: COLON func_name LPAR arg_list? RPAR
 func_name: NAME
 arg_list: expr (SP COMMA SP expr)*
 
-agg_call: KW_SUM LPAR SP expr SP RPAR
-        | KW_MIN LPAR SP expr SP RPAR
-        | KW_MAX LPAR SP expr SP RPAR
-        | KW_AVG LPAR SP expr SP RPAR
+agg_call: KW_SUM LPAR SP expr_no_nested SP RPAR
+        | KW_MIN LPAR SP expr_no_nested SP RPAR
+        | KW_MAX LPAR SP expr_no_nested SP RPAR
+        | KW_AVG LPAR SP expr_no_nested SP RPAR
         | KW_COUNT LPAR SP RPAR
 
 ident_chain: UIDENT (DOT UIDENT)+
+// Single alias reference for :DisplayValue(P), :ObjectUuid(T), .User = U (Select New With)
+alias_ref: UIDENT
 param_access: ATSIGN NAME
 nested_statement: LPAR SP from_clause (SP where_clause)? SP select_clause SP RPAR
 env_variable: KW_ENVIRONMENT DOT KW_CURRENTUSER DOT UIDENT (DOT UIDENT)*
+
+// Expression without nested_statement (for agg_call: Sum/Min/Max/Avg take scalar expr, not subquery)
+?expr_no_nested: or_expr_no_nested
+?or_expr_no_nested: and_expr_no_nested (SP KW_OR SP and_expr_no_nested)*
+?and_expr_no_nested: comp_expr_no_nested (SP KW_AND SP comp_expr_no_nested)*
+?comp_expr_no_nested: add_expr_no_nested
+                    | add_expr_no_nested SP comp_op SP add_expr_no_nested
+                    | add_expr_no_nested SP in_rhs
+                    | add_expr_no_nested SP like_rhs
+?add_expr_no_nested: mul_expr_no_nested (SP (PLUS | MINUS) SP mul_expr_no_nested)*
+?mul_expr_no_nested: unary_expr_no_nested (SP (STAR | SLASH | PERCENT) SP unary_expr_no_nested)*
+?unary_expr_no_nested: KW_NOT SP unary_expr_no_nested | MINUS SP unary_expr_no_nested | atom_no_nested
+?atom_no_nested: LPAR SP expr_no_nested SP RPAR
+               | func_call
+               | agg_call
+               | member_access
+               | alias_ref
+               | literal
+               | param_access
+               | env_variable
 
 // ---------- Literals ----------
 literal: KW_NULL | KW_TRUE | KW_FALSE | guid_lit | string_lit | number_lit | date_lit | datetime_lit | time_lit
