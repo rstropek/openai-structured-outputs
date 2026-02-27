@@ -1,19 +1,29 @@
 {
   "name": "functioncalls",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/server.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server/server.js"
+    "build": "tsc",
+    "start": "tsx server/server.ts",
+    "start:prod": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "OpenAI Structured Outputs with Function Calling - conference talk management",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "openai": "^5.19.1"
+    "openai": "^6.25.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^25.3.2",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
   }
 }
