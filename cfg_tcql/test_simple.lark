@@ -1,0 +1,22 @@
+// Minimal test grammar for OpenAI CFG — matches the official SQL example.
+// Use with GRAMMAR_FILE=test_simple.lark to verify the API works.
+// No %ignore; explicit SP: " " in rules (as in the docs).
+
+SP: " "
+COMMA: ","
+GT: ">"
+EQ: "="
+SEMI: ";"
+
+start: "SELECT" SP "TOP" SP NUMBER SP select_list SP "FROM" SP table SP "WHERE" SP amount_filter SP "AND" SP date_filter SP "ORDER" SP "BY" SP sort_cols SEMI
+
+select_list: column (COMMA SP column)*
+column: IDENTIFIER
+table: IDENTIFIER
+amount_filter: "total_amount" SP GT SP NUMBER
+date_filter: "order_date" SP GT SP DATE
+sort_cols: "order_date" SP "DESC"
+
+IDENTIFIER: /[A-Za-z_][A-Za-z0-9_]*/
+NUMBER: /[0-9]+/
+DATE: /'[0-9]{4}-[0-9]{2}-[0-9]{2}'/

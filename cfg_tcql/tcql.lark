@@ -1,0 +1,140 @@
+// tcql.lark — Time Cockpit Query Language (TCQL), simplified for OpenAI CFG.
+// Per docs: no %ignore; explicit SP: " " in rules; no lookaround/lazy in regexes.
+// Ref: https://docs.timecockpit.com/doc/tcql/overview.html
+
+SP: " "
+COMMA: ","
+DOT: "."
+LPAR: "("
+RPAR: ")"
+LBRACE: "{"
+RBRACE: "}"
+EQ: "="
+NEQ: "<>"
+LT: "<"
+LTE: "<="
+GT: ">"
+GTE: ">="
+PLUS: "+"
+MINUS: "-"
+STAR: "*"
+SLASH: "/"
+PERCENT: "%"
+ATSIGN: "@"
+COLON: ":"
+
+KW_FROM: "From"
+KW_IN: "In"
+KW_WHERE: "Where"
+KW_ORDER: "Order"
+KW_BY: "By"
+KW_SELECT: "Select"
+KW_NEW: "New"
+KW_WITH: "With"
+KW_ASC: "Asc"
+KW_DESC: "Desc"
+KW_VERSIONINFOONLY: "VersionInfoOnly"
+KW_AND: "And"
+KW_OR: "Or"
+KW_NOT: "Not"
+KW_LIKE: "Like"
+KW_NULL: "Null"
+KW_TRUE: "True"
+KW_FALSE: "False"
+KW_SET: "Set"
+KW_ENVIRONMENT: "Environment"
+KW_CURRENTUSER: "CurrentUser"
+KW_SUM: "Sum"
+KW_MIN: "Min"
+KW_MAX: "Max"
+KW_AVG: "Avg"
+KW_COUNT: "Count"
+
+// ---------- Start ----------
+start: from_clause (SP where_clause)? (SP orderby_clause)? SP select_clause
+
+// ---------- From ----------
+from_clause: KW_FROM SP alias SP KW_IN SP source
+alias: UIDENT
+source: entity_name include_chain?
+entity_name: UIDENT
+include_chain: (DOT include_call)+
+include_call: "Include" LPAR (relation_path | STAR) RPAR
+relation_path: string_lit
+
+// ---------- Where ----------
+where_clause: KW_WHERE SP expr
+
+// ---------- Order By ----------
+orderby_clause: KW_ORDER SP KW_BY SP sort_item (SP COMMA SP sort_item)*
+sort_item: expr (SP (KW_ASC | KW_DESC))?
+
+// ---------- Select ----------
+select_clause: select_alias | select_new
+select_alias: KW_SELECT SP alias (SP with_versioninfoonly)?
+with_versioninfoonly: KW_WITH LPAR KW_VERSIONINFOONLY RPAR
+select_new: KW_SELECT SP KW_NEW (SP target_identifier)? SP KW_WITH SP LBRACE SP member_decl (SP COMMA SP member_decl)* SP RBRACE
+target_identifier: UIDENT
+member_decl: member_access | DOT target_col_id SP EQ SP expr
+member_access: ident_chain
+target_col_id: UIDENT
+
+// ---------- Expressions ----------
+?expr: or_expr
+?or_expr: and_expr (SP KW_OR SP and_expr)*
+?and_expr: comp_expr (SP KW_AND SP comp_expr)*
+?comp_expr: add_expr
+          | add_expr SP comp_op SP add_expr
+          | add_expr SP in_rhs
+          | add_expr SP like_rhs
+comp_op: EQ | NEQ | LT | LTE | GT | GTE
+in_rhs: KW_IN SP LPAR SP expr (SP COMMA SP expr)* SP RPAR
+      | KW_IN SP KW_SET LPAR SP string_lit (SP COMMA SP string_lit)? SP RPAR
+      | KW_IN SP param_access
+like_rhs: (KW_NOT SP)? KW_LIKE SP add_expr
+?add_expr: mul_expr (SP (PLUS | MINUS) SP mul_expr)*
+?mul_expr: unary_expr (SP (STAR | SLASH | PERCENT) SP unary_expr)*
+?unary_expr: KW_NOT SP unary_expr | atom
+?atom: LPAR SP expr SP RPAR
+     | func_call
+     | agg_call
+     | member_access
+     | literal
+     | param_access
+     | nested_statement
+     | env_variable
+
+func_call: COLON func_name LPAR arg_list? RPAR
+func_name: NAME
+arg_list: expr (SP COMMA SP expr)*
+
+agg_call: KW_SUM LPAR SP expr SP RPAR
+        | KW_MIN LPAR SP expr SP RPAR
+        | KW_MAX LPAR SP expr SP RPAR
+        | KW_AVG LPAR SP expr SP RPAR
+        | KW_COUNT LPAR SP RPAR
+
+ident_chain: UIDENT (DOT UIDENT)+
+param_access: ATSIGN NAME
+nested_statement: LPAR SP from_clause (SP where_clause)? SP select_clause SP RPAR
+env_variable: KW_ENVIRONMENT DOT KW_CURRENTUSER DOT UIDENT (DOT UIDENT)*
+
+// ---------- Literals ----------
+literal: KW_NULL | KW_TRUE | KW_FALSE | guid_lit | string_lit | number_lit | date_lit | datetime_lit | time_lit
+guid_lit: "{" HEX8 "-" HEX4 "-" HEX4 "-" HEX4 "-" HEX12 "}"
+HEX8: /[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]/
+HEX4: /[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]/
+HEX12: /[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]/
+string_lit: /'[^'\r\n]*'|\"[^\"\r\n]*"/
+number_lit: DECIMAL | INT
+date_lit: "#" DIGIT4 "-" DIGIT2 "-" DIGIT2 "#"
+datetime_lit: "#" DIGIT4 "-" DIGIT2 "-" DIGIT2 SP DIGIT2 ":" DIGIT2 ":" DIGIT2 "#"
+time_lit: "#" DIGIT2 ":" DIGIT2 ":" DIGIT2 "#"
+DIGIT4: /[0-9][0-9][0-9][0-9]/
+DIGIT2: /[0-9][0-9]/
+
+// ---------- Terminals ----------
+UIDENT: /[A-Z][A-Za-z0-9_]*/
+NAME: /[A-Za-z_][A-Za-z0-9_]*/
+INT: /[0-9]+/
+DECIMAL: /[0-9]+\.[0-9]+/

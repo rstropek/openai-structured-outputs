@@ -1,0 +1,23 @@
+{
+  "name": "cfg-tcql",
+  "version": "1.0.0",
+  "description": "Generate valid TCQL (Time Cockpit Query Language) from natural language using OpenAI CFG and a Lark grammar",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "tsx index.ts",
+    "build": "tsc"
+  },
+  "keywords": ["openai", "cfg", "tcql", "lark", "grammar"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "openai": "^6.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.0"
+  }
+}

@@ -1,0 +1,142 @@
+# TCQL Test-Prompts mit erwarteter Lösung (laut time cockpit Doku)
+# Format: Prompt zum Einfügen bei "> ", darunter die erwartete TCQL-Lösung.
+# Quelle: https://docs.timecockpit.com/doc/tcql/
+
+# ========== Einfach: From / Where / Select ==========
+
+# Prompt:
+From P In Project Select P
+# Lösung (Doku): identisch
+From P In Project Select P
+
+# Prompt:
+Alle Projekte mit Projektname "Software Architects" anzeigen.
+# Lösung (Doku):
+From P In Project Where P.ProjectName = "Software Architects" Select P
+
+# Prompt:
+Zeige alle Timesheet-Einträge, die billierbar sind (Billable = True).
+# Lösung (Doku):
+From T In Timesheet Where T.Billable = True Select T
+
+# Prompt:
+Projekte, deren Startdatum am 2010-01-01 liegt.
+# Lösung (Doku):
+From P In Project Where P.StartDate = #2010-01-01# Select P
+
+# ========== Order By ==========
+
+# Prompt:
+Alle Projekte, sortiert nach Projektname aufsteigend.
+# Lösung (Doku):
+From P In Project Order By P.ProjectName Select P
+
+# Prompt:
+Projekte nach Projektname sortieren, dann nach Kundenname absteigend.
+# Lösung (Doku):
+From P In Project.Include("CustomerRelation") Order By P.ProjectName Asc, P.CustomerRelation.CustomerName Desc Select P
+
+# ========== Select New With (anonyme Ergebnistypen) ==========
+
+# Prompt:
+Von Timesheet T: BeginTime, Dauer (EndTime minus BeginTime), Description und das zugehörige Projekt als Select New With ausgeben.
+# Lösung (Doku):
+From T In Timesheet Select New With { .BeginTime = T.BeginTime, .Duration = T.EndTime - T.BeginTime, T.Description, .Project = T.Project, T.Project.CustomerRelation }
+
+# Prompt:
+Von Project mit Include Customer: Projektname und Kundenname als neues Objekt mit Select New With zurückgeben, sortiert nach Projektname.
+# Lösung (Doku):
+From P In Project.Include("CustomerRelation") Order By P.ProjectName, P.CustomerRelation.CustomerName Asc Select New With { P.ProjectName, P.CustomerRelation.CustomerName }
+
+# ========== Include ==========
+
+# Prompt:
+Alle Projekte inklusive der Relation Customer laden und dann P auswählen.
+# Lösung (Doku):
+From P In Project.Include("Customer") Select P
+
+# ========== Vergleiche, And, Or ==========
+
+# Prompt:
+Projekte, deren Projektname "ProjectName9" oder "ProjectName8" ist.
+# Lösung (Doku):
+From P In Project Where P.ProjectName = "ProjectName9" Or P.ProjectName = "ProjectName8" Select P
+
+# Prompt:
+Projekte, bei denen NumberOfHours ungleich Null ist und Billable = True.
+# Lösung (Doku): (Project hat typisch kein Billable; wenn doch: And; ansonsten nur NumberOfHours <> Null)
+From P In Project Where P.NumberOfHours <> Null Select P
+
+# ========== Datum/Zeit-Literale, Rechnung ==========
+
+# Prompt:
+Projekte, bei denen die Stundenzahl (6 + 4) * 4 ergibt.
+# Lösung (Doku):
+From P In Project Where P.NumberOfHours = ( 6 + 4 ) * 4 Select P
+
+# Prompt:
+Timesheets zwischen 2009-04-30 08:00:00 und 2009-04-30 12:00:00, mit Projektname, Startdatum und Summe der Stunden (Sum der DurationInHours).
+# Lösung (Doku):
+From T In Timesheet Where T.BeginTime >= #2009-04-30 08:00:00# And T.BeginTime <= #2009-04-30 12:00:00# Select New With { .ProjectName = T.Project.ProjectName, T.Project.StartDate, .TotalHours = Sum( T.DurationInHours ) }
+
+# ========== Like, Not Like ==========
+
+# Prompt:
+Alle Projekte, deren Name mit "Software" beginnt (z. B. mit :Substring).
+# Lösung (Doku):
+From P In Project Where :Substring( P.ProjectName, 1, 8 ) = "Software" Select P
+
+# Prompt:
+Timesheets, deren Beschreibung "time" enthält (Like).
+# Lösung (Doku):
+From T In Timesheet Where T.Description Like "%time%" Select T
+
+# ========== In (Liste), In Set ==========
+
+# Prompt:
+Projekte, bei denen NumberOfHours 1 oder 2 ist (In (1, 2)).
+# Lösung (Doku):
+From P In Project Where :Iif( P.NumberOfHours = 0, 1, P.NumberOfHours ) In ( 1, 2 ) Select P
+
+# Prompt:
+Kostenstellen, deren Code in der Menge "MyCostCenters" mit Property "Code" vorkommt (In Set).
+# Lösung (Doku):
+From C In CostCenter Where C.Code In Set( "MyCostCenters", "Code" ) Select C
+
+# ========== Funktionen ==========
+
+# Prompt:
+Projekte, bei denen :Iif(ProjectName = "Software Architects' time cockpit", "Hello World", "Nevermind") gleich "Hello World" ist.
+# Lösung (Doku):
+From P In Project Where :Iif( P.ProjectName = "Software Architects' TimeCockpit", "Hello World", "Nevermind" ) = "Hello World" Select P
+
+# Prompt:
+Timesheets, deren BeginTime vor :Now() liegt.
+# Lösung (Doku):
+From T In Timesheet Where T.BeginTime < :Now( ) Select T
+
+# ========== Environment.CurrentUser ==========
+
+# Prompt:
+UserDetail des aktuellen Benutzers: nur die Zeile, wo UserDetailUuid = Environment.CurrentUser.UserDetailUuid.
+# Lösung (Doku):
+From U In UserDetail Where U.UserDetailUuid = Environment.CurrentUser.UserDetailUuid Select U
+
+# ========== Subquery (komplex) ==========
+
+# Prompt:
+Projekte, bei denen eine Subquery über die Timesheets des Projekts die Summe der Stunden liefert und diese Summe größer als 5 ist. Ergebnis: das Projekt P.
+# Lösung (Doku):
+From P In Project Where ( From T In P.Timesheets Select New With { .TotalHours = Sum( T.DurationInHours ) } ) > 5 Select P
+
+# Prompt:
+Von Customer C, sortiert nach CustomerName: CustomerName und als zweite Spalte eine Subquery "Von P In C.Projects Where (Subquery über P.Timesheets mit Sum(DurationInHours)) > 5 Select New With Max(ProjectName)".
+# Lösung (Doku):
+From C In Customer Order By C.CustomerName Select New With { C.CustomerName, .MaxProjectName = ( From P In C.Projects Where ( From T In P.Timesheets Select New With { .TotalDuration = Sum( T.DurationInHours ) } ) > 5 Select New With { .ProjectName = Max( P.ProjectName ) } ) }
+
+# ========== Sehr komplex (alles zusammen) ==========
+
+# Prompt (natürlichsprachlich):
+Projekte inkl. Customer, wo NumberOfHours nicht Null und Projektname enthält "time", sortiert nach Projektname; Ergebnis: Projektname, Kundenname und Summe der Stunden.
+# Lösung (Doku): Aggregation ohne Group-By – TCQL gruppiert automatisch nach allen nicht aggregierten Ausdrücken.
+From P In Project.Include( "Customer" ) Where P.NumberOfHours <> Null And P.ProjectName Like "%time%" Order By P.ProjectName Asc Select New With { P.ProjectName, P.CustomerRelation.CustomerName, .TotalHours = Sum( P.NumberOfHours ) }
