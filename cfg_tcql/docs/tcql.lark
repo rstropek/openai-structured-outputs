@@ -66,6 +66,7 @@ include_call: "Include" LPAR (relation_path | STAR) RPAR
 relation_path: string_lit
 
 // ---------- Where ----------
+// API rejects "Where True" (where-clause must contain a real predicate). Omit Where when there is no filter.
 where_clause: KW_WHERE SP expr
 
 // ---------- Order By ----------
@@ -109,6 +110,7 @@ like_rhs: (KW_NOT SP)? KW_LIKE SP add_expr
      | nested_statement
      | env_variable
 
+// Use :Today() for current date; :Now() is not valid on the API. Date arithmetic: :AddYears(:Today(), -4) etc.
 func_call: COLON func_name LPAR arg_list? RPAR
 func_name: NAME
 arg_list: expr (SP COMMA SP expr)*

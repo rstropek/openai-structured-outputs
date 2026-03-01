@@ -19,12 +19,10 @@ Alle Projekte inklusive der Relation Customer laden.
 → From P In Project.Include( "Customer" ) Select P
 
 ────────────────────────────────────────────────────────────────────────────────
-3. Datum + Aggregation
+3. Projekte mit Stunden-Summe pro Monat (Subquery + Datumsfilter)
 ────────────────────────────────────────────────────────────────────────────────
 
-Timesheets zwischen 2009-04-30 08:00 und 12:00 Uhr, mit Projektname, Startdatum und Summe der Stunden.
-
-→ From T In Timesheet Where T.BeginTime >= #2009-04-30 08:00:00# And T.BeginTime <= #2009-04-30 12:00:00# Select New With { .ProjectName = T.Project.ProjectName, T.Project.StartDate, .TotalHours = Sum( T.DurationInHours ) }
+Gib mir alle Projekte und bei jedem Projekt soll die Summe der Stunden im Februar 2026 dabei stehen.
 
 ────────────────────────────────────────────────────────────────────────────────
 4. Like + Funktion
