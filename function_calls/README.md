@@ -15,7 +15,7 @@ Structured Outputs with Function Calling is a capability available in OpenAI's *
 
 ## Running the sample
 
-The server is written in **TypeScript** and uses the OpenAI **Responses API** with function calling.
+The server is written in **TypeScript** and uses the **[OpenAI Agents SDK](https://openai.github.io/openai-agents-js/)** (`@openai/agents`) with the Responses API. The SDK runs the agent loop and tool execution for you.
 
 1. **Install dependencies**
    ```bash
@@ -27,7 +27,7 @@ The server is written in **TypeScript** and uses the OpenAI **Responses API** wi
    ```
    OPENAI_API_KEY=your-api-key
    ```
-   Optional: set `OPENAI_MODEL` (default: `gpt-4o`) or `PORT` (default: `5000`).
+   Optional: set `OPENAI_MODEL` (default: `gpt-5.2`) or `PORT` (default: `5000`).
 
 3. **Run the server**
    ```bash
@@ -40,9 +40,16 @@ The server is written in **TypeScript** and uses the OpenAI **Responses API** wi
 
 ## Sample Overview
 
+This sample uses the **[OpenAI Agents SDK](https://openai.github.io/openai-agents-js/)** for TypeScript. The SDK provides:
+
+- **Agent loop**: Tool calls are executed automatically and results are fed back to the model until a final reply is produced (no manual `while` loop or response parsing).
+- **Function tools**: Tools are defined with `tool()` and **Zod** schemas; the SDK handles schema generation, validation, and execution.
+
+The server defines an `Agent` with instructions and three tools (`submit_talk_proposal`, `list_talks`, `delete_talks`) in `server/agentTools.ts`. Each request runs `run(agent, chat)` and returns the normalized `result.history` to the client.
+
 This sample showcases **structured parameter validation** in a conference talk management system. It demonstrates how to:
 
-1. Define strict JSON schemas for complex function parameters
-2. Enforce parameter compliance across different data types and structures
+1. Define tools with Zod schemas and `tool()` from `@openai/agents`
+2. Enforce parameter compliance via the SDK’s built-in validation
 3. Handle nested objects, arrays, and enum validations reliably
-4. Build type-safe AI interactions with guaranteed schema adherence
+4. Build type-safe AI interactions with minimal boilerplate (no manual function-call loop)

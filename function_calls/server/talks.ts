@@ -1,40 +1,4 @@
-/** Experience level for a speaker */
-export type ExperienceLevel = "beginner" | "intermediate" | "advanced";
-
-/** Talk category */
-export type TalkCategory =
-  | "AI"
-  | "Web Development"
-  | "Security"
-  | "DevOps"
-  | "UX"
-  | "Other";
-
-/** Talk format */
-export type TalkFormat = "Talk" | "Workshop" | "Lightning Talk";
-
-export interface Speaker {
-  name: string;
-  email: string;
-  experience_level: ExperienceLevel;
-}
-
-export interface CoSpeaker {
-  name: string;
-  email: string;
-}
-
-export interface Talk {
-  id: string;
-  title: string;
-  abstract: string;
-  speaker: Speaker;
-  co_speakers: CoSpeaker[];
-  category: TalkCategory;
-  format: TalkFormat;
-  keywords: string[];
-  proposed_datetime: string;
-}
+import type { Talk } from "./schema.js";
 
 const talks: Talk[] = [
   {

@@ -1,6 +1,6 @@
-Please submit a talk proposal for today (2026-03-03). My name is Melanie Bauer, and the topic is "OpenAI Function Calling." I do not have any co-speakers. Please complete all other required fields with appropriate and logical values.
+Please submit a talk proposal for today (2026-03-03). My name is Melanie Bauer (melanie@software-architects.at), and the topic is "OpenAI Function Calling." I do not have any co-speakers. Please complete all other required fields with appropriate and logical values.
 
-Please submit a talk for today (2026-03-03). The speaker is Rainer Stropek. He will have 4 co-speakers. He will talk about webdevelopment. Please complete all other required fields with appropriate and logical values.
+Please submit a talk for today (2026-03-03). The speaker is Rainer Stropek (rainer@software-architects.at). He will have 3 co-speakers. He will talk about webdevelopment. Please complete all other required fields with appropriate and logical values.
 
 Delete all talk proposals, where there are 2 or more speakers (including co-speaker).
 
