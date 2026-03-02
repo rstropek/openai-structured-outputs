@@ -1,4 +1,5 @@
 import "./style.css";
+import { marked } from "https://esm.sh/marked@15.0.4";
 
 const API_CHAT = "http://localhost:5000/api/chat";
 const API_TALKS = "http://localhost:5000/api/talks";
@@ -10,6 +11,23 @@ const talksArea = document.getElementById("talks-area");
 const detailModal = document.getElementById("detail-modal");
 
 let chat = [];
+
+marked.setOptions({ gfm: true });
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatMessageContent(content, role) {
+  const trimmed = (content || "").trim();
+  if (!trimmed) return "";
+  if (role === "user") {
+    return escapeHtml(trimmed).replace(/\n/g, "<br>");
+  }
+  return marked.parse(trimmed);
+}
 
 // Handle chat form submission and update chat
 chatForm.onsubmit = async (e) => {
@@ -25,23 +43,19 @@ chatForm.onsubmit = async (e) => {
   });
   const data = await res.json();
   chat = data;
-  console.log(chat);
   renderChat(chat);
   fetchTalks();
 };
 
 // Render chat bubbles in chat area and auto-scroll to bottom
 function renderChat(chat) {
-  console.log(chat);
   chatArea.innerHTML = chat
     .filter(msg => (msg.role === 'user' || msg.role === 'assistant') && msg.content && msg.content.trim() !== "")
     .map(msg => {
-      // Replace line breaks with <br>
-      const formatted = msg.content.replace(/\n/g, "<br>");
-      return `<div class="bubble ${msg.role}">${msg.role === 'user' ? '👤' : '🤖'} ${formatted}</div>`;
+      const formatted = formatMessageContent(msg.content, msg.role);
+      return `<div class="bubble ${msg.role}">${msg.role === 'user' ? '👤' : '🤖'} <span class="bubble-body">${formatted}</span></div>`;
     })
     .join('');
-  // Auto-scroll to bottom
   chatArea.scrollTop = chatArea.scrollHeight;
 }
 

@@ -3,7 +3,7 @@ import { z } from "zod/v4";
 /** Speaker for a talk proposal (Zod schema + inferred type) */
 export const speakerSchema = z.object({
   name: z.string(),
-  email: z.string().email(),
+  email: z.string(),
   experience_level: z.enum(["beginner", "intermediate", "advanced"]),
 });
 export type Speaker = z.infer<typeof speakerSchema>;
@@ -11,7 +11,7 @@ export type Speaker = z.infer<typeof speakerSchema>;
 /** Co-speaker (Zod schema + inferred type) */
 export const coSpeakerSchema = z.object({
   name: z.string(),
-  email: z.string().email(),
+  email: z.string(),
 });
 export type CoSpeaker = z.infer<typeof coSpeakerSchema>;
 

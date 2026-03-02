@@ -180,3 +180,62 @@ h1 {
   align-self: flex-start;
   margin-right: 30%;
 }
+
+/* Formatted markdown inside assistant bubbles */
+.bubble .bubble-body :first-child {
+  margin-top: 0;
+}
+.bubble .bubble-body :last-child {
+  margin-bottom: 0;
+}
+.bubble .bubble-body p {
+  margin: 0.4em 0;
+}
+.bubble .bubble-body p:first-child {
+  margin-top: 0;
+}
+.bubble .bubble-body ul,
+.bubble .bubble-body ol {
+  margin: 0.4em 0;
+  padding-left: 1.4em;
+}
+.bubble .bubble-body li {
+  margin: 0.2em 0;
+}
+.bubble .bubble-body code {
+  background: rgba(0,0,0,0.08);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.92em;
+}
+.bubble .bubble-body pre {
+  margin: 0.5em 0;
+  padding: 0.6em;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.06);
+  overflow-x: auto;
+  font-size: 0.9em;
+}
+.bubble .bubble-body pre code {
+  background: none;
+  padding: 0;
+}
+.bubble .bubble-body strong {
+  font-weight: 600;
+}
+.bubble .bubble-body em {
+  font-style: italic;
+}
+.bubble .bubble-body h1, .bubble .bubble-body h2, .bubble .bubble-body h3 {
+  margin: 0.5em 0 0.25em;
+  font-size: 1em;
+  font-weight: 600;
+}
+.bubble .bubble-body h1 { font-size: 1.1em; }
+.bubble .bubble-body h2 { font-size: 1.05em; }
+.bubble .bubble-body blockquote {
+  margin: 0.4em 0;
+  padding-left: 1em;
+  border-left: 3px solid rgba(0,0,0,0.2);
+  color: #444;
+}

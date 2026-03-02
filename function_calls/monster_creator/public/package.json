@@ -1,0 +1,11 @@
+{
+  "name": "monster-creator-public",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "vite"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}
