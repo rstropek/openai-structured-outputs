@@ -1,14 +1,20 @@
 // Load environment variables
 import OpenAI from "openai";
 import fs from "fs";
-import { ContractSchema } from "./schema.js";
+import { ContractDataSchema, InsufficientDataSchema, type ExtractionResult } from "./schema.js";
 import dotenv from "dotenv";
 import { z } from "zod/v4";
+import path from "path";
 
 dotenv.config();
 
-// Set file path and initialize OpenAI client
-const filePath = "Vertrag_Sternenschauer_Lizenzen.pdf";
+// Set file path from env and initialize OpenAI client
+const filePath = process.env.FILE_PATH;
+if (!filePath) {
+  console.error("ERROR: FILE_PATH environment variable is not set. Set it to a relative path of the document to process.");
+  process.exit(1);
+}
+const resolvedPath = path.resolve(filePath);
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -29,7 +35,7 @@ function getReasoningEffort(
 const OPENAI_FILE_ID = process.env.OPENAI_FILE_ID;
 
 // Main function to extract contract data from PDF
-async function extractContractData(filePath: string) {
+async function extractContractData(absolutePath: string) {
   try {
     let fileId: string;
 
@@ -38,7 +44,7 @@ async function extractContractData(filePath: string) {
       console.log(`Using existing file ID from OPENAI_FILE_ID: ${fileId}`);
     } else {
       // File upload
-      const fileStream: fs.ReadStream = fs.createReadStream(filePath);
+      const fileStream: fs.ReadStream = fs.createReadStream(absolutePath);
       const file = await openai.files.create({
         file: fileStream,
         purpose: "user_data",
@@ -50,7 +56,7 @@ async function extractContractData(filePath: string) {
     const response = await openai.responses.create({
       model: MODEL,
       instructions:
-        "Extract contract data according to the provided JSON schema.",
+        "Extract contract data from the uploaded document according to the provided JSON schema. If the document does not contain the requested contract information, return an insufficient_data result with a reason.",
       input: [
         {
           role: "user",
@@ -65,9 +71,14 @@ async function extractContractData(filePath: string) {
       text: {
         format: {
           type: 'json_schema',
-          name: 'structured_contract_data',
+          name: 'extraction_result',
           strict: true,
-          schema: z.toJSONSchema(ContractSchema)
+          schema: {
+            anyOf: [
+              z.toJSONSchema(ContractDataSchema),
+              z.toJSONSchema(InsufficientDataSchema),
+            ],
+          }
         },
       },
       ...(function () {
@@ -83,10 +94,18 @@ async function extractContractData(filePath: string) {
       return;
     }
 
-    // Output extracted contract data or handle errors
-    console.log(
-      `Extracted Contract Data:\n${JSON.stringify(JSON.parse(response.output_text), null, 2)}`
-    );
+    const parsed: ExtractionResult = JSON.parse(response.output_text);
+
+    // Output extracted contract data or handle insufficient data
+    if (parsed.result_type === "contract_data") {
+      console.log(
+        `Extracted Contract Data for ${parsed.contract_title}:\n${JSON.stringify(parsed, null, 2)}`
+      );
+    } else {
+      console.log(
+        `Insufficient data — could not extract contract information.\nReason: ${parsed.reason}`
+      );
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("Error during extraction:", message);
@@ -94,4 +113,4 @@ async function extractContractData(filePath: string) {
 }
 
 // Run extraction
-await extractContractData(filePath);
+await extractContractData(resolvedPath);

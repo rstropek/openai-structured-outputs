@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-export const ContractSchema = z.object({
+export const ContractDataSchema = z.object({
+  result_type: z.enum(["contract_data"]).describe("Discriminator: successful extraction"),
   contract_title: z.string().describe("Title or short name of the contract"),
   contract_date: z.string().describe("Date of signing (YYYY-MM-DD)"),
   effective_date: z.string().describe("When the contract takes effect (YYYY-MM-DD)"),
@@ -19,3 +20,12 @@ export const ContractSchema = z.object({
   annual_fee_eur: z.number().describe("Price / licensing cost"),
   headlines: z.array(z.string()).describe("Section titles in the contract"),
 });
+
+export const InsufficientDataSchema = z.object({
+  result_type: z.enum(["insufficient_data"]).describe("Discriminator: extraction not possible"),
+  reason: z.string().describe("Explanation of why the requested data could not be extracted from the document"),
+});
+
+export type ContractData = z.infer<typeof ContractDataSchema>;
+export type InsufficientData = z.infer<typeof InsufficientDataSchema>;
+export type ExtractionResult = ContractData | InsufficientData;
