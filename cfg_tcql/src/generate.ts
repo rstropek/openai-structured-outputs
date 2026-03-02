@@ -3,15 +3,16 @@ import {
   MODEL,
   TCQL_GRAMMAR_TOOL_NAME,
   getReasoningEffort,
+  GRAMMAR_PATH
 } from "./config.js";
-import { loadGrammar } from "./grammar.js";
+import fs from "fs";
 
 export async function generateTcqlQuery(
   naturalPrompt: string,
   instructions: string,
   openai: OpenAI
 ): Promise<string> {
-  const grammar = loadGrammar();
+  const grammar = fs.readFileSync(GRAMMAR_PATH, "utf-8");;
 
   const response = await openai.responses.create({
     model: MODEL,

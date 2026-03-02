@@ -26,6 +26,14 @@ function formatMessageContent(content, role) {
   return marked.parse(trimmed);
 }
 
+// Submit on Enter, newline on Shift+Enter
+chatInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    chatForm.requestSubmit();
+  }
+});
+
 chatForm.onsubmit = async (e) => {
   e.preventDefault();
   const userInput = chatInput.value;

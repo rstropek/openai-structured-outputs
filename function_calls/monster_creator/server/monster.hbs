@@ -1,0 +1,70 @@
+---
+obsidianUIMode: preview
+cssclasses: json5e-monster
+tags:
+{{#each tags}}
+  - {{this}}
+{{/each}}
+statblock: inline
+---
+
+# {{name}}
+
+```statblock
+layout: Basic 5e Layout
+name: {{name}}
+size: {{size}}
+type: {{type}}
+{{#if subtype}}
+subtype: {{subtype}}
+{{/if}}
+alignment: {{alignment}}
+ac: {{ac}}
+hp: {{hp}}
+hit_dice: {{hit_dice}}
+speed: "{{speed}}"
+stats: [{{joinStats stats}}]
+{{#if saves.length}}
+saves:
+{{#each saves}}
+  - {{this.name}}: {{this.mod}}
+{{/each}}
+{{/if}}
+{{#if skillsaves.length}}
+skillsaves:
+{{#each skillsaves}}
+  - {{this.name}}: {{this.mod}}
+{{/each}}
+{{/if}}
+{{#if damage_resistances}}
+damage_resistances: "{{damage_resistances}}"
+{{/if}}
+{{#if damage_immunities}}
+damage_immunities: "{{damage_immunities}}"
+{{/if}}
+{{#if condition_immunities}}
+condition_immunities: "{{condition_immunities}}"
+{{/if}}
+senses: "{{senses}}"
+languages: "{{languages}}"
+cr: {{cr}}
+{{#if traits.length}}
+traits:
+{{#each traits}}
+  - name: "{{this.name}}"
+    desc: "{{escDesc this.desc}}"
+{{/each}}
+{{/if}}
+{{#if actions.length}}
+actions:
+{{#each actions}}
+  - name: "{{this.name}}"
+    desc: "{{escDesc this.desc}}"
+{{/each}}
+{{/if}}
+```
+{{#if flavorText}}
+ 
+ 
+*{{flavorText}}*
+{{/if}}
