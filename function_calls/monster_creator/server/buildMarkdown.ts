@@ -41,16 +41,16 @@ export function buildMonsterMarkdown(p: WriteMonsterParams): string {
     `stats: [${p.stats.join(", ")}]`,
   ];
 
-  if (p.saves && Object.keys(p.saves).length > 0) {
+  if (p.saves.length > 0) {
     statblockLines.push("saves:");
-    for (const [k, v] of Object.entries(p.saves)) {
-      statblockLines.push(`  - ${k}: ${v}`);
+    for (const { name, mod } of p.saves) {
+      statblockLines.push(`  - ${name}: ${mod}`);
     }
   }
-  if (p.skillsaves && Object.keys(p.skillsaves).length > 0) {
+  if (p.skillsaves.length > 0) {
     statblockLines.push("skillsaves:");
-    for (const [k, v] of Object.entries(p.skillsaves)) {
-      statblockLines.push(`  - ${k}: ${v}`);
+    for (const { name, mod } of p.skillsaves) {
+      statblockLines.push(`  - ${name}: ${mod}`);
     }
   }
   if (p.damage_resistances) statblockLines.push(`damage_resistances: "${p.damage_resistances}"`);

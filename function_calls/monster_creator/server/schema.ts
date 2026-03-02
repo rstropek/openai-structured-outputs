@@ -38,8 +38,11 @@ export const statsArraySchema = z
   .length(6)
   .describe("Ability scores in order: STR, DEX, CON, INT, WIS, CHA");
 
-/** Saves or skills as key-value (e.g. { dexterity: 5, stealth: 5 }) */
-export const modifierMapSchema = z.record(z.string(), z.number()).default({});
+/** Single save or skill entry: name (e.g. dexterity, stealth) and modifier value */
+export const modifierMapSchema = z.object({
+  name: z.string(),
+  mod: z.number().int(),
+});
 
 /** Parameters for write_monster: full statblock data for Javalent Fantasy Statblocks (Basic 5e Layout) */
 export const writeMonsterParamsSchema = z.object({
@@ -61,8 +64,8 @@ export const writeMonsterParamsSchema = z.object({
   hit_dice: z.string().describe("e.g. '4d8' or '2d6 + 2'"),
   speed: z.string().describe("e.g. '30 ft.' or '0 ft., fly 30 ft. (hover)'"),
   stats: statsArraySchema,
-  saves: modifierMapSchema.describe("Saving throw modifiers, e.g. { dexterity: 5 }"),
-  skillsaves: modifierMapSchema.describe("Skill modifiers, e.g. { stealth: 5 }"),
+  saves: z.array(modifierMapSchema).default([]).describe("Saving throw modifiers, e.g. [{ name: 'dexterity', mod: 5 }]"),
+  skillsaves: z.array(modifierMapSchema).default([]).describe("Skill modifiers, e.g. [{ name: 'stealth', mod: 5 }]"),
   /** Damage resistances; omit or empty string if none. */
   damage_resistances: z.string().default(""),
   /** Damage immunities; omit or empty string if none. */
