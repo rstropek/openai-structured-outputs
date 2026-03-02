@@ -39,7 +39,7 @@ export const statsArraySchema = z
   .describe("Ability scores in order: STR, DEX, CON, INT, WIS, CHA");
 
 /** Saves or skills as key-value (e.g. { dexterity: 5, stealth: 5 }) */
-export const modifierMapSchema = z.record(z.string(), z.number()).optional();
+export const modifierMapSchema = z.record(z.string(), z.number()).default({});
 
 /** Parameters for write_monster: full statblock data for Javalent Fantasy Statblocks (Basic 5e Layout) */
 export const writeMonsterParamsSchema = z.object({
@@ -53,8 +53,8 @@ export const writeMonsterParamsSchema = z.object({
   size: monsterSizeSchema,
   /** Creature type (e.g. aberration, fiend, beast) */
   type: z.string(),
-  /** Subtype (e.g. voidborn, demon). Use empty string if not applicable. */
-  subtype: z.string(),
+  /** Subtype (e.g. voidborn, demon). Omit or empty string if not applicable. */
+  subtype: z.string().default(""),
   alignment: alignmentSchema,
   ac: z.number().int().describe("Armor class"),
   hp: z.number().int(),
@@ -63,32 +63,33 @@ export const writeMonsterParamsSchema = z.object({
   stats: statsArraySchema,
   saves: modifierMapSchema.describe("Saving throw modifiers, e.g. { dexterity: 5 }"),
   skillsaves: modifierMapSchema.describe("Skill modifiers, e.g. { stealth: 5 }"),
-  /** Damage resistances as a string; use empty string if none. */
-  damage_resistances: z.string(),
-  /** Damage immunities as a string; use empty string if none. */
-  damage_immunities: z.string(),
-  /** Condition immunities as a string; use empty string if none. */
-  condition_immunities: z.string(),
+  /** Damage resistances; omit or empty string if none. */
+  damage_resistances: z.string().default(""),
+  /** Damage immunities; omit or empty string if none. */
+  damage_immunities: z.string().default(""),
+  /** Condition immunities; omit or empty string if none. */
+  condition_immunities: z.string().default(""),
   senses: z.string().describe("e.g. 'darkvision 60 ft., passive Perception 10'"),
-  languages: z.string(),
+  languages: z.string().default(""),
   cr: z
     .string()
     .describe("Challenge rating e.g. '1/4' or '9'"),
-  traits: z.array(traitSchema).describe("Special traits; use an empty array if none."),
-  actions: z.array(traitSchema).describe("Actions the creature can take; use an empty array if none."),
+  traits: z.array(traitSchema).default([]).describe("Special traits; omit or empty array if none."),
+  actions: z.array(traitSchema).default([]).describe("Actions the creature can take; omit or empty array if none."),
   /** Optional extra frontmatter tags (e.g. homebrew). System always adds monster/cr, monster/size, monster/type, monster/subtype from statblock. */
-  tags: z.array(z.string()),
-  /** Flavor or lore text below the statblock; use empty string if none. */
-  flavor_text: z.string(),
+  tags: z.array(z.string()).default([]),
+  /** Flavor or lore text below the statblock; omit or empty string if none. */
+  flavor_text: z.string().default(""),
 });
 export type WriteMonsterParams = z.infer<typeof writeMonsterParamsSchema>;
 
-/** Parameters for list_monsters. folder: subfolder under bestiary (e.g. 'Void Monster'); use empty string to list root. */
+/** Parameters for list_monsters. folder: subfolder under bestiary (e.g. 'Void Monster'); omit or empty string to list root. */
 export const listMonstersParamsSchema = z.object({
   folder: z
     .string()
+    .default("")
     .describe(
-      "Subfolder under the bestiary (e.g. 'Void Monster'). Use empty string to list the root."
+      "Subfolder under the bestiary (e.g. 'Void Monster'). Omit or empty string to list the root."
     ),
 });
 export type ListMonstersParams = z.infer<typeof listMonstersParamsSchema>;
