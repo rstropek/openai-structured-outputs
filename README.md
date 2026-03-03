@@ -6,4 +6,4 @@ This repository contains samples related to **Structured Output** and **structur
 - **[function_calls/](function_calls/)** — Structured outputs via **function calling** (conference talk management; TypeScript server).
 - **[cfg_tcql/](cfg_tcql/)** — **Context-free grammar (CFG)** with a Lark grammar: natural language → valid **TCQL** (Time Cockpit Query Language) using a custom grammar tool.
 
-You can find the accompanying slides [here](https://slides.com/rainerstropek/openai-structured-output/fullscreen).
+You can find the accompanying slides in this repository.
