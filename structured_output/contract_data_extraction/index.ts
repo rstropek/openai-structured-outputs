@@ -1,7 +1,7 @@
 // Load environment variables
 import OpenAI from "openai";
 import fs from "fs";
-import { ContractDataSchema, InsufficientDataSchema, type ExtractionResult } from "./schema.js";
+import { ExtractionResultSchema, type ExtractionEnvelope, type ExtractionResult } from "./schema.js";
 import dotenv from "dotenv";
 import { z } from "zod/v4";
 import path from "path";
@@ -70,15 +70,10 @@ async function extractContractData(absolutePath: string) {
       ],
       text: {
         format: {
-          type: 'json_schema',
-          name: 'extraction_result',
+          type: "json_schema",
+          name: "extraction_result",
           strict: true,
-          schema: {
-            anyOf: [
-              z.toJSONSchema(ContractDataSchema),
-              z.toJSONSchema(InsufficientDataSchema),
-            ],
-          }
+          schema: z.toJSONSchema(ExtractionResultSchema),
         },
       },
       ...(function () {
@@ -94,7 +89,8 @@ async function extractContractData(absolutePath: string) {
       return;
     }
 
-    const parsed: ExtractionResult = JSON.parse(response.output_text);
+    const envelope: ExtractionEnvelope = JSON.parse(response.output_text);
+    const parsed: ExtractionResult = envelope.result;
 
     // Output extracted contract data or handle insufficient data
     if (parsed.result_type === "contract_data") {

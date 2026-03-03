@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const ContractDataSchema = z.object({
   result_type: z.enum(["contract_data"]).describe("Discriminator: successful extraction"),
@@ -26,6 +26,17 @@ export const InsufficientDataSchema = z.object({
   reason: z.string().describe("Explanation of why the requested data could not be extracted from the document"),
 });
 
+/**
+ * Envelope schema for Structured Outputs.
+ * The root is a plain object with a single `result` field that uses JSON Schema anyOf.
+ * This keeps the root as an object (required by Structured Outputs) while allowing multiple result shapes.
+ */
+export const ExtractionResultSchema = z.object({
+  // Use a Zod union; z.toJSONSchema will emit an `anyOf` for this field.
+  result: z.union([ContractDataSchema, InsufficientDataSchema]),
+});
+
 export type ContractData = z.infer<typeof ContractDataSchema>;
 export type InsufficientData = z.infer<typeof InsufficientDataSchema>;
-export type ExtractionResult = ContractData | InsufficientData;
+export type ExtractionEnvelope = z.infer<typeof ExtractionResultSchema>;
+export type ExtractionResult = ExtractionEnvelope["result"];
