@@ -3,9 +3,9 @@ import fs from "fs";
 import dotenv from "dotenv";
 import readline from "readline";
 import OpenAI from "openai";
-import { GRAMMAR_FILE, MODEL, getDirname, RESULTS_DIR } from "./config.js";
-import { buildInstructions } from "./prompt.js";
+import { GRAMMAR_FILE, MODEL, getDirname, RESULTS_DIR, buildInstructions } from "./config.js";
 import { generateTcqlQuery } from "./generate.js";
+
 import {
   getMetadata,
   formatMetadataForPrompt,
